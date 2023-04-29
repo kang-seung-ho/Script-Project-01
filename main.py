@@ -8,6 +8,8 @@ import shutil
 from PIL import Image
 import datetime
 import zipfile
+import os
+import comtypes.client
 
 window = Tk()
 window.title('File Assistant')
@@ -148,7 +150,6 @@ def copy_files_EXT(ext):
 
     ext_folder = os.path.join(sorted_files_folder, ext)
 
-
     for root, dirs, files in os.walk(selectedFolerpath):
         for file in files:
             if file.endswith(ext):
@@ -168,8 +169,6 @@ def copy_files_EXT(ext):
         messagebox.showerror('실패', f'{ext} 파일이 없거나 분류에 실패했습니다.')
 
 
-
-
 #확장자 입력받기
 def gettext():
     input_text = inputbox.get()
@@ -182,7 +181,6 @@ getEXT = Button(window, text='입력한 확장자 모으기', width=30, command=
 getEXT.place(x=130, y=100)
 
 
-
 #정보 및 도움말 팝업
 def showInfo():
     messagebox.showinfo('도움말', '폴더 선택 후 사진 분류버튼을 누르세요.\n선택된 폴더 내의 사진들을 연월별로 분류합니다.\nTOPDF: 워드, PPT 파일을 PDF로 변환할 수 있습니다.\n오래된 파일 정리: 폴더 선택 후 오래된 기준을 선택하면\nOLD.zip 파일로 모으는 정리가 시작됩니다.\n입력한 확장자 모으기: 폴더 선택 후 박스에 원하는 확장자를\n입력하면 입력한 확장자 이름의 폴더로 해당 확장자 파일들을 복사합니다. \n\n만든이: 2019182001 게임공학과 강승호')
@@ -192,14 +190,7 @@ InfoButton = Button(window, text='도움말', width=15, command=showInfo)
 InfoButton.place(x=530, y=20)
 
 
-
-
-
 selectedFilePath = ''
-
-import os
-import comtypes.client
-
 
 def select_File():
     selectedFilePaths = filedialog.askopenfilenames()  # 여러 파일을 선택할 수 있게 변경
@@ -213,12 +204,9 @@ def select_File():
 
 
 def convert2PDF(input_file, output_file):
-    # MS Office 어플리케이션 생성
+    # 오피스 객체 생성
     powerpoint = comtypes.client.CreateObject('Powerpoint.Application')
     word = comtypes.client.CreateObject('Word.Application')
-
-    input_file = os.fsdecode(input_file)  # 파일 경로에 있는 유니코드문자처리
-    output_file = os.fsdecode(output_file)  # 파일 경로에 있는 유니코드문자처리
 
     try:
         # PPT -> PDF
@@ -243,10 +231,11 @@ def convert2PDF(input_file, output_file):
         return False
 
 
-    # MS Office 어플리케이션 종료
+    #오피스 객체 종료
     powerpoint.Quit()
     word.Quit()
     messagebox.showinfo('변환성공', '선택한 파일을 성공적으로 PDF로 변환하였습니다.')
+
 
 
 
@@ -256,8 +245,6 @@ PDFBUTTON.place(x=0, y=150)
 
 days = IntVar()
 days.set(0)
-
-
 
 def zip_and_remove_OLD():
     global selectedFolerpath
