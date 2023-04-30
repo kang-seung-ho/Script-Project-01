@@ -10,6 +10,7 @@ import datetime
 import zipfile
 import os
 import comtypes.client
+import chardet
 
 window = Tk()
 window.title('File Assistant')
@@ -23,7 +24,7 @@ selectedFolerpath=''
 def getPhotoDate(filepath):
     try:
         image = Image.open(filepath)
-        if hasattr(image, '_getexif'):
+        if hasattr(image, '_getexif'): #이게 특정 속성을 가지고 있는지를 확인하는 함수, EXIF: 이미지 메타데이터
             exifdata = image._getexif()
             if exifdata:
                 for tag, value in exifdata.items():
@@ -83,8 +84,6 @@ selectFolButton = Button(window, text='폴더 선택', width=15,command=selectFo
 selectFolButton.place(x=0, y=20)
 
 
-import chardet
-
 def fileReadTypes(filename):
     ext = ['.txt', '.py', '.c', '.cpp', '.java', '.js', '.go', '.rb', '.rs', '.php']
     return any(filename.endswith(ext) for ext in ext) #filename이 ext안에 해당하는 파일이면 true리턴
@@ -105,18 +104,18 @@ def getKeywordFiles(keyword):
                 file_path = os.path.join(root, file)
                 with open(file_path, 'rb') as f:
                     binary_contents = f.read()
-                detected = chardet.detect(binary_contents)
-                encoding = detected['encoding']
-                contents = binary_contents.decode(encoding)
+                find_encodingGet = chardet.detect(binary_contents) #딕셔러니 형태로 리턴. 그래서 'encoding'으로 얻어와야함
+                encoding = find_encodingGet['encoding']
+                contents = binary_contents.decode(encoding) #그 인코딩에 대해 디코드해서 텍스트로 파일 읽기
 
                 if keyword in contents:
-                    dest_dir = sorted_keyword_path
-                    if not os.path.exists(dest_dir):
-                        os.makedirs(dest_dir)
-                    dest_path = os.path.join(dest_dir, file)
+                    get_FILE_path = sorted_keyword_path
+                    if not os.path.exists(get_FILE_path):
+                        os.makedirs(get_FILE_path)
+                    dest_path = os.path.join(get_FILE_path, file)
 
                     # 원본 파일과 대상 파일이 동일한지 확인하고 같으면 건너뜀
-                    if os.path.abspath(file_path) == os.path.abspath(dest_path):
+                    if os.path.abspath(file_path) == os.path.abspath(get_FILE_path):
                         continue
                     shutil.copy(file_path, dest_path)
     messagebox.showinfo('성공', '입력한 키워드가 포함된 파일을 모아왔습니다.')
@@ -183,7 +182,7 @@ getEXT.place(x=130, y=100)
 
 #정보 및 도움말 팝업
 def showInfo():
-    messagebox.showinfo('도움말', '폴더 선택 후 사진 분류버튼을 누르세요.\n선택된 폴더 내의 사진들을 연월별로 분류합니다.\nTOPDF: 워드, PPT 파일을 PDF로 변환할 수 있습니다.\n오래된 파일 정리: 폴더 선택 후 오래된 기준을 선택하면\nOLD.zip 파일로 모으는 정리가 시작됩니다.\n입력한 확장자 모으기: 폴더 선택 후 박스에 원하는 확장자를\n입력하면 입력한 확장자 이름의 폴더로 해당 확장자 파일들을 복사합니다. \n\n만든이: 2019182001 게임공학과 강승호')
+    messagebox.showinfo('도움말', '사진 분류: 폴더 선택 후 사진 분류버튼을 누르세요.\n\n선택된 폴더 내의 사진들을 연월별로 분류합니다.\n\nTOPDF: 워드, PPT 파일을 PDF로 변환할 수 있습니다.\n\n오래된 파일 정리: 폴더 선택 후 오래된 기준을 선택하면\n         OLD.zip 파일로 모으는 정리가 시작됩니다.\n\n입력한 확장자 모으기: 폴더 선택 후 박스에 원하는 확장자를\n입력하면 입력한 확장자 이름의 폴더로 해당 확장자 파일들을 복사합니다.\n\n입력한 키워드 모으기: 입력한 키워드가 포함된 파일을 모읍니다.')
 
 
 InfoButton = Button(window, text='도움말', width=15, command=showInfo)
